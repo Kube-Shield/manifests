@@ -1,14 +1,23 @@
-#!/bin/bash
-cd "$(dirname $0)"
-kubectl create namespace crapi
-#kubectl apply -f https://raw.githubusercontent.com/rancher/local-path-provisioner/master/deploy/local-path-storage.yaml
+#!/usr/bin/env bash
+set -euo pipefail
+cd "$(dirname "$0")"
 
-kubectl create -n crapi secret generic jwt-key-secret --from-file=../keys
-kubectl apply -n crapi -f ./rbac
-kubectl apply -n crapi -f ./mongodb
-kubectl apply -n crapi -f ./postgres
-kubectl apply -n crapi -f ./mailhog
-kubectl apply -n crapi -f ./identity
-kubectl apply -n crapi -f ./community
-kubectl apply -n crapi -f ./workshop
-kubectl apply -n crapi -f ./web
+NAMESPACE="${NAMESPACE:-crapi}"
+
+kubectl create namespace "${NAMESPACE}" --dry-run=client -o yaml | kubectl apply -f -
+
+if [ ! -d "../keys" ]; then
+  echo "error: ../keys directory not found; generate the JWT keys before deploying" >&2
+  exit 1
+fi
+kubectl create secret generic jwt-key-secret --from-file=../keys -n "${NAMESPACE}" --dry-run=client -o yaml | kubectl apply -f -
+
+kubectl apply -n "${NAMESPACE}" -f ./rbac
+kubectl apply -n "${NAMESPACE}" -f ./mongodb
+kubectl apply -n "${NAMESPACE}" -f ./postgres
+kubectl apply -n "${NAMESPACE}" -f ./mailhog
+kubectl apply -n "${NAMESPACE}" -f ./identity
+kubectl apply -n "${NAMESPACE}" -f ./community
+kubectl apply -n "${NAMESPACE}" -f ./workshop
+kubectl apply -n "${NAMESPACE}" -f ./gateway-service
+kubectl apply -n "${NAMESPACE}" -f ./web

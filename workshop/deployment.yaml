@@ -34,6 +34,8 @@ spec:
         envFrom:
             - configMapRef:
                 name: crapi-workshop-configmap
+            - secretRef:
+                name: crapi-workshop-secret
         resources:
           limits:
             cpu: "256m"

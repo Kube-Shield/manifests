@@ -20,6 +20,8 @@ spec:
           envFrom:
             - configMapRef:
                 name: mongodb-config
+            - secretRef:
+                name: mongodb-secret
           volumeMounts:
             - mountPath: /data/db
               name: mongodb-data
