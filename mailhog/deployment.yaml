@@ -18,12 +18,16 @@ spec:
         sidecar.traceable.ai/inject: "false"
     spec:
       securityContext:
-        runAsUser: 0
-        runAsGroup: 0
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
+        seccompProfile:
+          type: RuntimeDefault
       containers:
         - name: mailhog
-          image: crapi/mailhog:latest
-          imagePullPolicy: "Always"
+          image: crapi/mailhog:v1
+          imagePullPolicy: IfNotPresent
           livenessProbe:
             tcpSocket:
               port: 1025
@@ -46,10 +50,14 @@ spec:
                 name: mailhog-configmap
             - secretRef:
                 name: mailhog-secret
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: ["ALL"]
           resources:
-            limits:
-              cpu: "1"
-              memory: 1024Mi
             requests:
               cpu: 50m
               memory: 64Mi
+            limits:
+              cpu: "1"
+              memory: 1024Mi

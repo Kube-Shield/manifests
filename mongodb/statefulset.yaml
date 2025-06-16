@@ -3,7 +3,7 @@ kind: StatefulSet
 metadata:
   name: mongodb
 spec:
-  serviceName: mongodb 
+  serviceName: mongodb
   replicas: 1
   selector:
     matchLabels:
@@ -13,15 +13,45 @@ spec:
       labels:
         app: mongodb
     spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 999
+        runAsGroup: 999
+        fsGroup: 999
+        seccompProfile:
+          type: RuntimeDefault
       containers:
         - name: mongodb
           image: mongo:4.4
-          imagePullPolicy: "IfNotPresent"
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 27017
           envFrom:
             - configMapRef:
                 name: mongodb-config
             - secretRef:
                 name: mongodb-secret
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: ["ALL"]
+          resources:
+            requests:
+              cpu: 100m
+              memory: 256Mi
+            limits:
+              cpu: "1"
+              memory: 1Gi
+          readinessProbe:
+            tcpSocket:
+              port: 27017
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          livenessProbe:
+            tcpSocket:
+              port: 27017
+            initialDelaySeconds: 30
+            periodSeconds: 20
           volumeMounts:
             - mountPath: /data/db
               name: mongodb-data

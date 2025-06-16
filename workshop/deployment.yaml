@@ -12,23 +12,40 @@ spec:
       labels:
         app: crapi-workshop
     spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
+        seccompProfile:
+          type: RuntimeDefault
       initContainers:
         - name: wait-for-crapi-identity
-          image: groundnuty/k8s-wait-for:latest
-          imagePullPolicy: Always
+          image: groundnuty/k8s-wait-for:no-root-v2.0
+          imagePullPolicy: IfNotPresent
           args:
             - "service"
             - "crapi-identity"
+          securityContext:
+            allowPrivilegeEscalation: false
+            runAsNonRoot: true
+            capabilities:
+              drop: ["ALL"]
         - name: wait-for-crapi-community
-          image: groundnuty/k8s-wait-for:latest
-          imagePullPolicy: Always
+          image: groundnuty/k8s-wait-for:no-root-v2.0
+          imagePullPolicy: IfNotPresent
           args:
             - "service"
             - "crapi-community"
+          securityContext:
+            allowPrivilegeEscalation: false
+            runAsNonRoot: true
+            capabilities:
+              drop: ["ALL"]
       containers:
       - name: crapi-workshop
-        image: crapi/crapi-workshop:latest
-        imagePullPolicy: Always  
+        image: crapi/crapi-workshop:v1
+        imagePullPolicy: IfNotPresent
         ports:
         - containerPort: 8000
         envFrom:
@@ -36,13 +53,24 @@ spec:
                 name: crapi-workshop-configmap
             - secretRef:
                 name: crapi-workshop-secret
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop: ["ALL"]
         resources:
-          limits:
-            cpu: "256m"
           requests:
-            cpu: 256m
+            cpu: 128m
+            memory: 256Mi
+          limits:
+            cpu: "512m"
+            memory: 512Mi
         readinessProbe:
           tcpSocket:
             port: 8000
           initialDelaySeconds: 15
           periodSeconds: 10
+        livenessProbe:
+          tcpSocket:
+            port: 8000
+          initialDelaySeconds: 30
+          periodSeconds: 20

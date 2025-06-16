@@ -12,26 +12,42 @@ spec:
       labels:
         app: crapi-web
     spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
+        seccompProfile:
+          type: RuntimeDefault
       containers:
       - name: crapi-web
-        image: crapi/crapi-web:develop
-        imagePullPolicy: Always
+        image: crapi/crapi-web:v1
+        imagePullPolicy: IfNotPresent
         ports:
         - containerPort: 80
+        envFrom:
+          - configMapRef:
+              name: crapi-web-configmap
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop: ["ALL"]
         resources:
+          requests:
+            cpu: 100m
+            memory: 128Mi
           limits:
             cpu: "500m"
-          requests:
-            cpu: 256m
-        env:
-        - name: COMMUNITY_SERVICE
-          value: "crapi-community:8087"
-        - name: IDENTITY_SERVICE
-          value: "crapi-identity:8080"
-        - name: WORKSHOP_SERVICE
-          value: "crapi-workshop:8000"
-        - name: MAILHOG_WEB_SERVICE
-          value: "mailhog:8025"
-        - name: TLS_ENABLED
-          value: "false"
-
+            memory: 256Mi
+        readinessProbe:
+          httpGet:
+            path: /
+            port: 80
+          initialDelaySeconds: 10
+          periodSeconds: 10
+        livenessProbe:
+          httpGet:
+            path: /
+            port: 80
+          initialDelaySeconds: 20
+          periodSeconds: 20

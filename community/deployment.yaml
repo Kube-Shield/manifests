@@ -12,29 +12,51 @@ spec:
       labels:
         app: crapi-community
     spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
+        seccompProfile:
+          type: RuntimeDefault
       initContainers:
         - name: wait-for-postgres
-          image: groundnuty/k8s-wait-for:latest
-          imagePullPolicy: Always
+          image: groundnuty/k8s-wait-for:no-root-v2.0
+          imagePullPolicy: IfNotPresent
           args:
             - "service"
             - "postgresdb"
+          securityContext:
+            allowPrivilegeEscalation: false
+            runAsNonRoot: true
+            capabilities:
+              drop: ["ALL"]
         - name: wait-for-mongo
-          image: groundnuty/k8s-wait-for:latest
-          imagePullPolicy: Always
+          image: groundnuty/k8s-wait-for:no-root-v2.0
+          imagePullPolicy: IfNotPresent
           args:
             - "service"
             - "mongodb"
+          securityContext:
+            allowPrivilegeEscalation: false
+            runAsNonRoot: true
+            capabilities:
+              drop: ["ALL"]
         - name: wait-for-java
-          image: groundnuty/k8s-wait-for:latest
-          imagePullPolicy: Always
+          image: groundnuty/k8s-wait-for:no-root-v2.0
+          imagePullPolicy: IfNotPresent
           args:
             - "service"
             - "crapi-identity"
+          securityContext:
+            allowPrivilegeEscalation: false
+            runAsNonRoot: true
+            capabilities:
+              drop: ["ALL"]
       containers:
       - name: crapi-community
-        image: crapi/crapi-community:latest
-        imagePullPolicy: Always
+        image: crapi/crapi-community:v1
+        imagePullPolicy: IfNotPresent
         ports:
         - containerPort: 8087
         envFrom:
@@ -42,8 +64,24 @@ spec:
                 name: crapi-community-configmap
             - secretRef:
                 name: crapi-community-secret
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop: ["ALL"]
         resources:
-          limits:
-            cpu: "500m"
           requests:
             cpu: 256m
+            memory: 256Mi
+          limits:
+            cpu: "500m"
+            memory: 512Mi
+        readinessProbe:
+          tcpSocket:
+            port: 8087
+          initialDelaySeconds: 15
+          periodSeconds: 10
+        livenessProbe:
+          tcpSocket:
+            port: 8087
+          initialDelaySeconds: 30
+          periodSeconds: 20

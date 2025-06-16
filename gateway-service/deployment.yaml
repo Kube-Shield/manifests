@@ -12,14 +12,40 @@ spec:
       labels:
         app: gateway-service
     spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
+        seccompProfile:
+          type: RuntimeDefault
       containers:
       - name: gateway-service
-        image: crapi/gateway-service:latest
-        imagePullPolicy: Always
+        image: crapi/gateway-service:v1
+        imagePullPolicy: IfNotPresent
         ports:
         - containerPort: 8087
+        envFrom:
+          - configMapRef:
+              name: gateway-service-configmap
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop: ["ALL"]
         resources:
-          limits:
-            cpu: "100m"
           requests:
             cpu: 50m
+            memory: 64Mi
+          limits:
+            cpu: "100m"
+            memory: 128Mi
+        readinessProbe:
+          tcpSocket:
+            port: 8087
+          initialDelaySeconds: 10
+          periodSeconds: 10
+        livenessProbe:
+          tcpSocket:
+            port: 8087
+          initialDelaySeconds: 20
+          periodSeconds: 20

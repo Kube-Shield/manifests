@@ -5,4 +5,4 @@ metadata:
   labels:
     app: gateway-service
 data:
-    SERVER_PORT: "443"
+    SERVER_PORT: "8087"

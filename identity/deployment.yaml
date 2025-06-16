@@ -12,25 +12,37 @@ spec:
       labels:
         app: crapi-identity
     spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
+        seccompProfile:
+          type: RuntimeDefault
       initContainers:
         - name: wait-for-postgres
-          image: groundnuty/k8s-wait-for:latest
-          imagePullPolicy: Always
+          image: groundnuty/k8s-wait-for:no-root-v2.0
+          imagePullPolicy: IfNotPresent
           args:
             - "service"
             - "postgresdb"
+          securityContext:
+            allowPrivilegeEscalation: false
+            runAsNonRoot: true
+            capabilities:
+              drop: ["ALL"]
       volumes:
         - name: jwt-key-secret
           secret:
             secretName: jwt-key-secret
       containers:
         - name: crapi-identity
-          image: crapi/crapi-identity:latest
+          image: crapi/crapi-identity:v1
           volumeMounts:
             - mountPath: "/.keys"
               name: jwt-key-secret
               readOnly: true
-          imagePullPolicy: Always
+          imagePullPolicy: IfNotPresent
           ports:
           - containerPort: 8080
           envFrom:
@@ -38,14 +50,24 @@ spec:
                   name: crapi-identity-configmap
               - secretRef:
                   name: crapi-identity-secret
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: ["ALL"]
           resources:
-            limits:
-              cpu: "500m"
             requests:
               cpu: 256m
+              memory: 512Mi
+            limits:
+              cpu: "500m"
+              memory: 1Gi
           readinessProbe:
             tcpSocket:
               port: 8080
             initialDelaySeconds: 15
             periodSeconds: 10
-
+          livenessProbe:
+            tcpSocket:
+              port: 8080
+            initialDelaySeconds: 30
+            periodSeconds: 20

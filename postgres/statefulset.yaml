@@ -13,11 +13,18 @@ spec:
       labels:
         app: postgresdb
     spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 999
+        runAsGroup: 999
+        fsGroup: 999
+        seccompProfile:
+          type: RuntimeDefault
       containers:
         - name: postgres
           image: postgres:14
           args: ["-c", "max_connections=500"]
-          imagePullPolicy: "IfNotPresent"
+          imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 5432
           envFrom:
@@ -25,7 +32,27 @@ spec:
                 name: postgres-config
             - secretRef:
                 name: postgres-secret
-
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: ["ALL"]
+          resources:
+            requests:
+              cpu: 100m
+              memory: 256Mi
+            limits:
+              cpu: "1"
+              memory: 1Gi
+          readinessProbe:
+            exec:
+              command: ["pg_isready", "-U", "admin", "-d", "crapi"]
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          livenessProbe:
+            exec:
+              command: ["pg_isready", "-U", "admin", "-d", "crapi"]
+            initialDelaySeconds: 30
+            periodSeconds: 20
           volumeMounts:
             - mountPath: /var/lib/postgresql/data
               name: postgres-data
