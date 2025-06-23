@@ -17,6 +17,7 @@ spec:
       annotations:
         sidecar.traceable.ai/inject: "false"
     spec:
+      automountServiceAccountToken: false
       securityContext:
         runAsNonRoot: true
         runAsUser: 1000

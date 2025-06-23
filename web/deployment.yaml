@@ -12,6 +12,7 @@ spec:
       labels:
         app: crapi-web
     spec:
+      automountServiceAccountToken: false
       securityContext:
         runAsNonRoot: true
         runAsUser: 1000

@@ -13,6 +13,7 @@ spec:
       labels:
         app: mongodb
     spec:
+      automountServiceAccountToken: false
       securityContext:
         runAsNonRoot: true
         runAsUser: 999
@@ -22,7 +23,7 @@ spec:
           type: RuntimeDefault
       containers:
         - name: mongodb
-          image: mongo:4.4
+          image: mongo:7.0.45
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 27017
@@ -55,7 +56,14 @@ spec:
           volumeMounts:
             - mountPath: /data/db
               name: mongodb-data
-      volumes:
-        - name: mongodb-data
-          persistentVolumeClaim:
-            claimName: mongodb-pv-claim
+  volumeClaimTemplates:
+    - metadata:
+        name: mongodb-data
+        labels:
+          app: mongodb
+      spec:
+        accessModes:
+          - ReadWriteOnce
+        resources:
+          requests:
+            storage: 1Gi

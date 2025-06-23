@@ -12,6 +12,7 @@ spec:
       labels:
         app: gateway-service
     spec:
+      automountServiceAccountToken: false
       securityContext:
         runAsNonRoot: true
         runAsUser: 1000

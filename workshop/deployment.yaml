@@ -12,6 +12,7 @@ spec:
       labels:
         app: crapi-workshop
     spec:
+      serviceAccountName: crapi-wait-for
       securityContext:
         runAsNonRoot: true
         runAsUser: 1000
