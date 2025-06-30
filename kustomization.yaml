@@ -1,0 +1,44 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: crapi
+resources:
+  - rbac/serviceaccount.yaml
+  - rbac/role.yaml
+  - rbac/rolebinding.yaml
+  - postgres/config.yaml
+  - postgres/secret.yaml
+  - postgres/service.yaml
+  - postgres/statefulset.yaml
+  - mongodb/config.yaml
+  - mongodb/secret.yaml
+  - mongodb/service.yaml
+  - mongodb/statefulset.yaml
+  - mailhog/config.yaml
+  - mailhog/secret.yaml
+  - mailhog/service.yaml
+  - mailhog/deployment.yaml
+  - mailhog/ingress.yaml
+  - identity/config.yaml
+  - identity/secret.yaml
+  - identity/service.yaml
+  - identity/deployment.yaml
+  - community/config.yaml
+  - community/secret.yaml
+  - community/service.yaml
+  - community/deployment.yaml
+  - workshop/config.yaml
+  - workshop/secret.yaml
+  - workshop/service.yaml
+  - workshop/deployment.yaml
+  - gateway-service/config.yaml
+  - gateway-service/service.yaml
+  - gateway-service/deployment.yaml
+  - web/configmap.yaml
+  - web/service.yaml
+  - web/deployment.yaml
+  - web/ingress.yaml
+  - networkpolicy/default-deny.yaml
+  - networkpolicy/allow-dns.yaml
+  - networkpolicy/allow-namespace.yaml
+  - networkpolicy/allow-ingress-controller.yaml
+  - quota/limits.yaml

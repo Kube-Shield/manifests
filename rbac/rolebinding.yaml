@@ -5,6 +5,7 @@ metadata:
 subjects:
 - kind: ServiceAccount
   name: crapi-wait-for
+  namespace: crapi
 roleRef:
   kind: Role
   name: waitfor-reader

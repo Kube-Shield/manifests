@@ -13,4 +13,6 @@ kubectl delete -n "${NAMESPACE}" -f ./mailhog --ignore-not-found
 kubectl delete -n "${NAMESPACE}" -f ./postgres --ignore-not-found
 kubectl delete -n "${NAMESPACE}" -f ./mongodb --ignore-not-found
 kubectl delete -n "${NAMESPACE}" -f ./rbac --ignore-not-found
+kubectl delete -n "${NAMESPACE}" -f ./networkpolicy --ignore-not-found
+kubectl delete -n "${NAMESPACE}" -f ./quota --ignore-not-found
 kubectl delete secret jwt-key-secret -n "${NAMESPACE}" --ignore-not-found

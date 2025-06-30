@@ -13,6 +13,8 @@ fi
 kubectl create secret generic jwt-key-secret --from-file=../keys -n "${NAMESPACE}" --dry-run=client -o yaml | kubectl apply -f -
 
 kubectl apply -n "${NAMESPACE}" -f ./rbac
+kubectl apply -n "${NAMESPACE}" -f ./quota
+kubectl apply -n "${NAMESPACE}" -f ./networkpolicy
 kubectl apply -n "${NAMESPACE}" -f ./mongodb
 kubectl apply -n "${NAMESPACE}" -f ./postgres
 kubectl apply -n "${NAMESPACE}" -f ./mailhog
